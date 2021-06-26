@@ -8,7 +8,7 @@ export async function logUserOut(request, reply) {
         if (request?.cookies?.refreshToken) {
             const { refreshToken } = request.cookies
             // decode refresh token
-            const {sessionToken} = jwt.verify(refreshToken, JWTSignature)
+            const { sessionToken } = jwt.verify(refreshToken, JWTSignature)
             // delete db record for session
             await session.deleteOne({
                 sessionToken: sessionToken

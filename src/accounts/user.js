@@ -24,10 +24,10 @@ export async function getUserFromCookies(request, reply) {
         if (request?.cookies?.refreshToken) {
             const { refreshToken } = request.cookies
             // decode refresh token
-            const {sessionToken} = jwt.verify(refreshToken, JWTSignature)
+            const { sessionToken } = jwt.verify(refreshToken, JWTSignature)
             // look up session
             const currentSession = await session.findOne({
-                sessionToken: sessionToken
+                sessionToken
             })
             // confirm session is valid
             if (currentSession.valid) {
