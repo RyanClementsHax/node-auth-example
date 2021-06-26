@@ -8,6 +8,8 @@ import { connectDb } from './db.js'
 import { registerUser } from './accounts/register.js'
 import { authorizeUser } from './accounts/authorize.js'
 import { logUserIn } from './accounts/logUserIn.js'
+import { logUserOut } from './accounts/logUserOut.js'
+import { getUserFromCookies } from './accounts/user.js'
 
 // ESM specific features
 const __filename = fileURLToPath(import.meta.url)
@@ -26,8 +28,22 @@ async function startApp() {
         app.post('/api/register', {}, async (request, reply) => {
             try {
                 const userId = await registerUser(request.body.email, request.body.password)
+                if (userId) {
+                    await logUserIn(userId, request, reply)
+                    reply.send({
+                        data: {
+                            status: 'SUCCESS',
+                            userId
+                        }
+                    })
+                }
             } catch (e) {
                 console.error(e)
+                reply.send({
+                    data: {
+                        status: 'FAILED'
+                    }
+                })
             }
         })
         app.post('/api/authorize', {}, async (request, reply) => {
@@ -35,24 +51,61 @@ async function startApp() {
                 const { isAuthorized, userId } = await authorizeUser(request.body.email, request.body.password)
                 if (isAuthorized) {
                     await logUserIn(userId, request, reply)
+                    reply.send({
+                        data: {
+                            status: 'SUCCESS',
+                            userId
+                        }
+                    })
                 }
-                // generate auth tokens
-                // set cookies
-                reply.setCookie('testCookie', 'the value is this', {
-                    path: '/',
-                    domain: 'localhost',
-                    httpOnly: true
-                }).send({
-                    data: 'just testing'
+            } catch (e) {
+                console.error(e)
+                reply.send({
+                    data: {
+                        status: 'FAILED'
+                    }
+                })
+            }
+        })
+        app.post('/api/logout', {}, async (request, reply) => {
+            try {
+                await logUserOut(request, reply)
+                reply.send({
+                    data: {
+                        status: 'SUCCESS'
+                    }
                 })
             } catch (e) {
                 console.error(e)
+                reply.send({
+                    data: {
+                        status: 'FAILED'
+                    }
+                })
+            }
+        })
+        app.get('/test', {}, async (request, reply) => {
+            try {
+                // verify user login
+                const user = await getUserFromCookies(request, reply)
+                // return user email, if it exists, otherwise return unauthenticated
+                if (user?._id) {
+                    reply.send({
+                        user
+                    })
+                } else {
+                    reply.send({
+                        data: 'user lookup failed'
+                    })
+                }
+            } catch (e) {
+                throw new Error(e)
             }
         })
         await app.listen(3000)
         console.log("server listening at port 3000")
     } catch (e) {
-        console.error('e', e)
+        console.error(e)
     }
 }
 
