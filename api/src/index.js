@@ -12,7 +12,7 @@ import { logUserIn } from './accounts/logUserIn.js'
 import { logUserOut } from './accounts/logUserOut.js'
 import { getUserFromCookies } from './accounts/user.js'
 import { sendEmail, mailInit } from './mail/index.js'
-import { createVerifyEmailLink } from './accounts/verify.js'
+import { createVerifyEmailLink, validateVerifyEmail } from './accounts/verify.js'
 
 // ESM specific features
 const __filename = fileURLToPath(import.meta.url)
@@ -101,6 +101,21 @@ async function startApp() {
                         status: 'FAILED'
                     }
                 })
+            }
+        })
+        app.post('/api/verify', {}, async (request, reply) => {
+            try {
+                const { email, token } = request.body
+                console.log(request.body)
+                const isValid = await validateVerifyEmail(token, email)
+                if (isValid) {
+                    return reply.code(200).send()
+                } else {
+                    return reply.code(401).send()
+                }
+            } catch (e) {
+                console.error(e)
+                return reply.code(401).send()
             }
         })
         app.get('/test', {}, async (request, reply) => {
