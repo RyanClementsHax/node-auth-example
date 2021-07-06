@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "ui": "npx serve ui"
+    "dev": "nodemon src/index.js"
   },
   "author": "",
   "license": "ISC",
