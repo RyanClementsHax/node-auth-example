@@ -10,7 +10,7 @@ import { registerUser } from './accounts/register.js'
 import { authorizeUser } from './accounts/authorize.js'
 import { logUserIn } from './accounts/logUserIn.js'
 import { logUserOut } from './accounts/logUserOut.js'
-import { getUserFromCookies } from './accounts/user.js'
+import { getUserFromCookies, changePassword } from './accounts/user.js'
 import { sendEmail, mailInit } from './mail/index.js'
 import { createVerifyEmailLink, validateVerifyEmail } from './accounts/verify.js'
 
@@ -103,10 +103,27 @@ async function startApp() {
                 })
             }
         })
+        app.post('/api/change-password', {}, async (request, reply) => {
+            try {
+                const { oldPassword, newPassword } = request.body
+                // verify user login
+                const user = await getUserFromCookies(request, reply)
+                if (user?.email?.address) {
+                    const { isAuthorized, userId } = await authorizeUser(user.email.address, oldPassword)
+                    if (isAuthorized) {
+                        await changePassword(userId, newPassword)
+                        return reply.code(200).send('all good')
+                    }
+                }
+                return reply.code(401).send()
+            } catch (e) {
+                console.error(e)
+                return reply.code(401).send()
+            }
+        })
         app.post('/api/verify', {}, async (request, reply) => {
             try {
                 const { email, token } = request.body
-                console.log(request.body)
                 const isValid = await validateVerifyEmail(token, email)
                 if (isValid) {
                     return reply.code(200).send()
