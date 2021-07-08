@@ -45,7 +45,7 @@ export async function validateVerifyEmail(token, email) {
         }
         return false
     } catch (e) {
-       console.log(e) 
-       return false
+        console.log(e)
+        return false
     }
 }
