@@ -128,7 +128,6 @@
                             "Content-type": "application/json; charset=UTF-8"
                         }
                     })
-                    console.log('here')
                     const loginData = await res.json()
                     if (loginData.data.status === '2FA') {
                         console.log('2FA')

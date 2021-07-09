@@ -44,8 +44,6 @@
             })
             const userData = await userResponse.json()
             if (userData?.data?.user?.email?.address) {
-                console.log(userData)
-
                 const secret = otplib.authenticator.generateSecret()
                 const otpauth = otplib.authenticator.keyuri(
                     userData.data.user.email.address,
